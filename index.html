@@ -283,6 +283,70 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Page navigation logic - Set up first to ensure it works regardless of other code
+    const pageSections = document.querySelectorAll('.page-section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+
+    const showPage = (pageId) => {
+        pageSections.forEach(section => {
+            section.classList.add('hidden');
+        });
+        document.querySelector(pageId).classList.remove('hidden');
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+        const activeLink = document.querySelector(`[href="${pageId}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+
+        // Scroll to top of the new page, accounting for fixed header
+        const headerOffset = document.getElementById('header').offsetHeight;
+        window.scrollTo({
+            top: document.querySelector(pageId).offsetTop - headerOffset,
+            behavior: 'smooth'
+        });
+    };
+
+    // Navigation click handlers
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pageId = link.getAttribute('href');
+            showPage(pageId);
+            if (!mobileMenu.classList.contains('hidden')) { // Close mobile menu if open
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    });
+
+    // 開始探索 button click handler
+    const startExploringButton = document.querySelector('a[href="#toolkit"]:not(.nav-link)');
+    if (startExploringButton) {
+        startExploringButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage('#toolkit');
+        });
+    }
+
+    // Mobile Menu Toggle
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Close mobile menu on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
+    });
+
+    // Initial page load
+    showPage('#home');
+
     // Data Store
     const showdownData = {
         '放射學': {
@@ -479,107 +543,99 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Init Showdown Chart
     let showdownChart; // Declare outside for scope
-    const showdownCtx = document.getElementById('showdownChart').getContext('2d');
-    const specialtySelect = document.getElementById('specialty-select');
-    const showdownSummaryEl = document.getElementById('showdown-summary');
+    let showdownCtx, specialtySelect, showdownSummaryEl;
+    
+    try {
+        showdownCtx = document.getElementById('showdownChart').getContext('2d');
+        specialtySelect = document.getElementById('specialty-select');
+        showdownSummaryEl = document.getElementById('showdown-summary');
 
-    Object.keys(showdownData).forEach(specialty => {
-        const option = document.createElement('option');
-        option.value = specialty;
-        option.textContent = specialty;
-        specialtySelect.appendChild(option);
-    });
+        Object.keys(showdownData).forEach(specialty => {
+            const option = document.createElement('option');
+            option.value = specialty;
+            option.textContent = specialty;
+            specialtySelect.appendChild(option);
+        });
+    } catch (e) {
+        console.warn('Showdown chart initialization failed:', e);
+    }
 
     // Init Synergy Chart
     let synergyChart; // Declare outside for scope
-    const synergyCtx = document.getElementById('synergyChart').getContext('2d');
+    let synergyCtx;
+    
+    try {
+        synergyCtx = document.getElementById('synergyChart').getContext('2d');
+    } catch (e) {
+        console.warn('Synergy chart initialization failed:', e);
+    }
 
-    // Page navigation logic
-    const pageSections = document.querySelectorAll('.page-section');
-    const navLinks = document.querySelectorAll('.nav-link');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
-
-    const showPage = (pageId) => {
-        pageSections.forEach(section => {
-            section.classList.add('hidden');
-        });
-        document.querySelector(pageId).classList.remove('hidden');
-
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-        });
-        document.querySelector(`[href="${pageId}"]`).classList.add('active');
-
+    // Chart handling - add chart creation logic to showPage function
+    const originalShowPage = showPage;
+    window.showPage = (pageId) => {
+        originalShowPage(pageId);
+        
         // Special handling for charts to ensure they render correctly when their div becomes visible
-        if (pageId === '#showdown' && !showdownChart) {
-             showdownChart = createChart(showdownCtx, 'bar', showdownData[specialtySelect.value]);
-             showdownSummaryEl.textContent = showdownData[specialtySelect.value].summary;
+        if (pageId === '#showdown' && !showdownChart && showdownCtx) {
+            try {
+                showdownChart = createChart(showdownCtx, 'bar', showdownData[specialtySelect.value]);
+                if (showdownSummaryEl) {
+                    showdownSummaryEl.textContent = showdownData[specialtySelect.value].summary;
+                }
+            } catch (e) {
+                console.warn('Failed to create showdown chart:', e);
+            }
         } else if (pageId === '#showdown' && showdownChart) {
             showdownChart.update(); // Update to ensure responsiveness is triggered
         }
 
-        if (pageId === '#synergy' && !synergyChart) {
-             synergyChart = createChart(synergyCtx, 'bar', synergyData, {
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) { label += ': '; }
-                                if (context.parsed.y !== null) {
-                                    label += context.parsed.y.toFixed(1) + '%';
+        if (pageId === '#synergy' && !synergyChart && synergyCtx) {
+            try {
+                synergyChart = createChart(synergyCtx, 'bar', synergyData, {
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(1) + '%';
+                                    }
+                                    return label;
                                 }
-                                return label;
+                            }
+                        }
+                    },
+                    scales: {
+                         y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
                             }
                         }
                     }
-                },
-                scales: {
-                     y: {
-                        ticks: {
-                            callback: function(value) {
-                                return value + '%';
-                            }
-                        }
-                    }
-                }
-            });
+                });
+            } catch (e) {
+                console.warn('Failed to create synergy chart:', e);
+            }
         } else if (pageId === '#synergy' && synergyChart) {
             synergyChart.update(); // Update to ensure responsiveness is triggered
         }
-
-        // Scroll to top of the new page, accounting for fixed header
-        const headerOffset = document.getElementById('header').offsetHeight;
-        window.scrollTo({
-            top: document.querySelector(pageId).offsetTop - headerOffset,
-            behavior: 'smooth'
-        });
     };
 
-    // Initial page load
-    showPage('#home');
-
-    // Navigation click handlers
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const pageId = link.getAttribute('href');
-            showPage(pageId);
-            if (!mobileMenu.classList.contains('hidden')) { // Close mobile menu if open
-                mobileMenu.classList.add('hidden');
+    if (specialtySelect) {
+        specialtySelect.addEventListener('change', (e) => {
+            const selectedSpecialty = e.target.value;
+            if (showdownChart) {
+                showdownChart.data = showdownData[selectedSpecialty];
+                showdownChart.update();
+                if (showdownSummaryEl) {
+                    showdownSummaryEl.textContent = showdownData[selectedSpecialty].summary;
+                }
             }
         });
-    });
-
-    specialtySelect.addEventListener('change', (e) => {
-        const selectedSpecialty = e.target.value;
-        if (showdownChart) {
-            showdownChart.data = showdownData[selectedSpecialty];
-            showdownChart.update();
-            showdownSummaryEl.textContent = showdownData[selectedSpecialty].summary;
-        }
-    });
+    }
 
     // Init Toolkit Section
     const toolkitContainer = document.getElementById('toolkit-container');
@@ -651,18 +707,6 @@ document.addEventListener('DOMContentLoaded', () => {
         itemDiv.appendChild(button);
         itemDiv.appendChild(content);
         accordionContainer.appendChild(itemDiv);
-    });
-
-    // Mobile Menu Toggle
-    mobileMenuButton.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-    });
-
-    // Close mobile menu on link click
-    mobileMenu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            mobileMenu.classList.add('hidden');
-        });
     });
 
 });
