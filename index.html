@@ -37,6 +37,15 @@
             .chart-container {
                 height: 350px;
                 max-height: 60vh;
+                min-height: 300px; /* Ensure minimum height on mobile */
+                padding: 0 10px; /* Add padding to prevent edge cutoff */
+            }
+        }
+        /* Ensure canvas elements are properly sized on mobile */
+        @media (max-width: 768px) {
+            .chart-container canvas {
+                max-width: 100% !important;
+                height: auto !important;
             }
         }
         .nav-link {
@@ -495,22 +504,46 @@ document.addEventListener('DOMContentLoaded', () => {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                // Improve mobile responsiveness
+                devicePixelRatio: window.devicePixelRatio || 1,
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
                         grid: { color: '#E7E5E4' },
-                        ticks: { color: '#57534E' }
+                        ticks: { 
+                            color: '#57534E',
+                            // Improve mobile readability
+                            font: {
+                                size: isMobile() ? 10 : 12
+                            }
+                        }
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { color: '#57534E' }
+                        ticks: { 
+                            color: '#57534E',
+                            // Improve mobile readability  
+                            font: {
+                                size: isMobile() ? 10 : 12
+                            },
+                            maxRotation: isMobile() ? 45 : 0
+                        }
                     }
                 },
                 plugins: {
                     legend: {
                         position: 'top',
                         labels: {
-                            color: '#57534E'
+                            color: '#57534E',
+                            font: {
+                                size: isMobile() ? 11 : 13
+                            },
+                            boxWidth: isMobile() ? 12 : 15,
+                            padding: isMobile() ? 10 : 15
                         }
                     },
                     tooltip: {
@@ -518,6 +551,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         titleColor: '#F5F5F4',
                         bodyColor: '#F5F5F4',
                         boxPadding: 4,
+                        titleFont: {
+                            size: isMobile() ? 12 : 14
+                        },
+                        bodyFont: {
+                            size: isMobile() ? 11 : 13
+                        },
                         callbacks: {
                            label: function(context) {
                                 let label = context.dataset.label || '';
@@ -570,6 +609,63 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Synergy chart initialization failed:', e);
     }
 
+    // Check if Chart.js is available and provide fallback
+    const isChartJSAvailable = () => {
+        return typeof Chart !== 'undefined';
+    };
+
+    const showChartFallback = (containerId, message) => {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 200px; padding: 20px; background-color: #f3f4f6; border-radius: 8px; color: #6b7280;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                    <div style="font-size: 16px; text-align: center; line-height: 1.5;">
+                        ${message}
+                    </div>
+                </div>
+            `;
+        }
+    };
+
+    // Helper function to check if we're on mobile
+    const isMobile = () => window.innerWidth <= 768;
+    
+    // Helper function to create chart with mobile-specific timing
+    const createChartWithMobileSupport = (ctx, type, data, options = {}) => {
+        if (!isChartJSAvailable()) {
+            console.warn('Chart.js is not available');
+            return Promise.resolve(null);
+        }
+        
+        const chartCreator = () => {
+            try {
+                return createChart(ctx, type, data, options);
+            } catch (e) {
+                console.warn('Chart creation failed:', e);
+                return null;
+            }
+        };
+        
+        // On mobile, add a small delay to ensure container is properly sized
+        if (isMobile()) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const chart = chartCreator();
+                    if (chart) {
+                        // Force a resize after creation on mobile
+                        setTimeout(() => {
+                            chart.resize();
+                        }, 100);
+                    }
+                    resolve(chart);
+                }, 50);
+            });
+        } else {
+            return Promise.resolve(chartCreator());
+        }
+    };
+
     // Chart handling - add chart creation logic to showPage function
     const originalShowPage = showPage;
     window.showPage = (pageId) => {
@@ -577,21 +673,39 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Special handling for charts to ensure they render correctly when their div becomes visible
         if (pageId === '#showdown' && !showdownChart && showdownCtx) {
-            try {
-                showdownChart = createChart(showdownCtx, 'bar', showdownData[specialtySelect.value]);
-                if (showdownSummaryEl) {
-                    showdownSummaryEl.textContent = showdownData[specialtySelect.value].summary;
-                }
-            } catch (e) {
-                console.warn('Failed to create showdown chart:', e);
+            if (!isChartJSAvailable()) {
+                showChartFallback('showdownChart', '圖表功能需要網路連接才能正常顯示<br>請檢查您的網路連接並重新整理頁面');
+                return;
             }
+            
+            createChartWithMobileSupport(showdownCtx, 'bar', showdownData[specialtySelect.value])
+                .then(chart => {
+                    if (chart) {
+                        showdownChart = chart;
+                        if (showdownSummaryEl) {
+                            showdownSummaryEl.textContent = showdownData[specialtySelect.value].summary;
+                        }
+                    } else {
+                        showChartFallback('showdownChart', '圖表載入失敗<br>請重新整理頁面或稍後再試');
+                    }
+                });
         } else if (pageId === '#showdown' && showdownChart) {
             showdownChart.update(); // Update to ensure responsiveness is triggered
+            // Force resize on mobile to handle viewport changes
+            if (isMobile()) {
+                setTimeout(() => {
+                    showdownChart.resize();
+                }, 100);
+            }
         }
 
         if (pageId === '#synergy' && !synergyChart && synergyCtx) {
-            try {
-                synergyChart = createChart(synergyCtx, 'bar', synergyData, {
+            if (!isChartJSAvailable()) {
+                showChartFallback('synergyChart', '圖表功能需要網路連接才能正常顯示<br>請檢查您的網路連接並重新整理頁面');
+                return;
+            }
+            
+            createChartWithMobileSupport(synergyCtx, 'bar', synergyData, {
                     plugins: {
                         tooltip: {
                             callbacks: {
@@ -615,12 +729,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     }
+                })
+                .then(chart => {
+                    if (chart) {
+                        synergyChart = chart;
+                    } else {
+                        showChartFallback('synergyChart', '圖表載入失敗<br>請重新整理頁面或稍後再試');
+                    }
                 });
-            } catch (e) {
-                console.warn('Failed to create synergy chart:', e);
-            }
         } else if (pageId === '#synergy' && synergyChart) {
             synergyChart.update(); // Update to ensure responsiveness is triggered
+            // Force resize on mobile to handle viewport changes
+            if (isMobile()) {
+                setTimeout(() => {
+                    synergyChart.resize();
+                }, 100);
+            }
         }
     };
 
@@ -630,12 +754,44 @@ document.addEventListener('DOMContentLoaded', () => {
             if (showdownChart) {
                 showdownChart.data = showdownData[selectedSpecialty];
                 showdownChart.update();
+                // Force resize on mobile after data update
+                if (isMobile()) {
+                    setTimeout(() => {
+                        showdownChart.resize();
+                    }, 100);
+                }
                 if (showdownSummaryEl) {
                     showdownSummaryEl.textContent = showdownData[selectedSpecialty].summary;
                 }
             }
         });
     }
+
+    // Add resize handler for mobile viewport changes and orientation changes
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (showdownChart) {
+                showdownChart.resize();
+            }
+            if (synergyChart) {
+                synergyChart.resize();
+            }
+        }, 250);
+    });
+
+    // Add orientation change handler for mobile devices
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            if (showdownChart) {
+                showdownChart.resize();
+            }
+            if (synergyChart) {
+                synergyChart.resize();
+            }
+        }, 500); // Longer delay for orientation change
+    });
 
     // Init Toolkit Section
     const toolkitContainer = document.getElementById('toolkit-container');
