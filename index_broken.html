@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI醫學檢索的深度分析：AI在系統性回顧中的應用</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Teal Accent -->
+    <!-- Application Structure Plan: A multi-page SPA simulation within a single HTML file. Each main section acts as a distinct "page" that occupies the full viewport height. Navigation links control the visibility of these pages, ensuring only one is active at a time. This structure prioritizes a clear, isolated view for each thematic area (Home, AI Toolkit, Model Showdown, Human-AI Synergy, Challenges, Strategies), enhancing focus and preventing content overlap. It's chosen for its intuitive "tabbed browsing" feel, making dense report information digestible by presenting it in logical, self-contained units. -->
+    <!-- Visualization & Content Choices: 
+        - Model Comparison (Table 1 Data): Goal: Compare. Method: Interactive Bar Chart (Chart.js) with a dropdown filter. Justification: Allows users to dynamically compare AI model performance in specific medical fields, which is more engaging and personalized than a static table.
+        - Human-AI Performance (Table 2 Data): Goal: Compare. Method: Dynamic stat cards for impact and a grouped bar chart (Chart.js). Justification: Stat cards highlight the most dramatic efficiency gains, while the chart provides a clear, quantitative comparison of AI vs. Human vs. Collaborative performance.
+        - Challenges & Ethics: Goal: Organize. Method: Accordion layout. Justification: Condenses a large volume of text into manageable, thematic sections, preventing user fatigue and improving scannability.
+        - AI Toolkit: Goal: Inform & Organize. Method: Clickable info cards. Justification: An interactive way to present a list of tools without cluttering the initial view.
+        - Library/Method: Chart.js for all charts, rendered on Canvas. Layout with Tailwind CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F5F5F4; /* stone-100 */
+            color: #44403C; /* stone-700 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 60vh;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0D9488; /* teal-600 */
+            border-bottom-color: #0D9488;
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            text-align: center;
+            border-left: 5px solid #2DD4BF; /* teal-400 */
+        }
+        .accordion-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 1rem;
+            font-weight: 500;
+            text-align: left;
+            background-color: #ffffff;
+            border: 1px solid #E7E5E4; /* stone-200 */
+            border-radius: 0.5rem;
+            transition: background-color 0.3s;
+        }
+        .accordion-button:hover {
+            background-color: #FAFAF9; /* stone-50 */
+        }
+        .accordion-content {
+            padding: 1rem;
+            border: 1px solid #E7E5E4;
+            border-top: 0;
+        }
+        
+        /* Mobile-specific styles for toolkit cards */
+        @media (max-width: 768px) {
+            .toolkit-card-mobile {
+                margin-bottom: 1rem;
+            }
+            
+            .toolkit-details-mobile {
+                margin-top: 0.5rem;
+                padding: 1rem;
+                background-color: #ffffff;
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+                border-left: 4px solid #0D9488;
+            }
+            
+            .toolkit-details-mobile.hidden {
+                display: none;
+            }
+            
+            .toolkit-details-mobile .tool-item {
+                display: flex;
+                align-items: start;
+                margin-bottom: 0.75rem;
+                padding: 0.75rem;
+                background-color: #F0FDFA;
+                border-radius: 0.375rem;
+                border: 1px solid #CCFBF1;
+            }
+            
+            .toolkit-details-mobile .tool-icon {
+                width: 2.5rem;
+                height: 2.5rem;
+                border-radius: 50%;
+                background-color: #0D9488;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 0.75rem;
+                flex-shrink: 0;
+            }
+            
+            .toolkit-details-mobile .tool-content h4 {
+                font-weight: 600;
+                color: #0F172A;
+                margin-bottom: 0.25rem;
+            }
+            
+            .toolkit-details-mobile .tool-content p {
+                color: #64748B;
+                font-size: 0.875rem;
+                line-height: 1.4;
+            }
+            
+            /* Hide desktop details on mobile */
+            #toolkit-details {
+                display: none;
+            }
+        }
+        
+        /* Desktop-specific styles */
+        @media (min-width: 769px) {
+            .toolkit-details-mobile {
+                display: none;
+            }
+        }
+        
+        .hidden {
+            display: none;
+            border-radius: 0 0 0.5rem 0.5rem;
+            background-color: #ffffff;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-section {
+            min-height: calc(100vh - 4rem); /* Full viewport height minus header height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 4rem; /* To account for sticky header */
+            padding-bottom: 4rem;
+        }
+        .page-section.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-teal-700">AI醫學檢索分析</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="nav-link px-3 py-2 rounded-md text-sm font-medium">首頁</a>
+                        <a href="#toolkit" class="nav-link px-3 py-2 rounded-md text-sm font-medium">AI工具箱</a>
+                        <a href="#showdown" class="nav-link px-3 py-2 rounded-md text-sm font-medium">模型對決</a>
+                        <a href="#synergy" class="nav-link px-3 py-2 rounded-md text-sm font-medium">人機協作</a>
+                        <a href="#challenges" class="nav-link px-3 py-2 rounded-md text-sm font-medium">挑戰與倫理</a>
+                        <a href="#strategies" class="nav-link px-3 py-2 rounded-md text-sm font-medium">行動策略</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-teal-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="nav-link block px-3 py-2 rounded-md text-base font-medium">首頁</a>
+                <a href="#toolkit" class="nav-link block px-3 py-2 rounded-md text-base font-medium">AI工具箱</a>
+                <a href="#showdown" class="nav-link block px-3 py-2 rounded-md text-base font-medium">模型對決</a>
+                <a href="#synergy" class="nav-link block px-3 py-2 rounded-md text-base font-medium">人機協作</a>
+                <a href="#challenges" class="nav-link block px-3 py-2 rounded-md text-base font-medium">挑戰與倫理</a>
+                <a href="#strategies" class="nav-link block px-3 py-2 rounded-md text-base font-medium">行動策略</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="page-section bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-4xl font-extrabold text-stone-800 sm:text-5xl md:text-6xl">AI醫學檢索的深度分析</h2>
+                <p class="mt-6 max-w-2xl mx-auto text-xl text-stone-600">探索AI如何重塑系統性文獻回顧，以及醫院研究者在AI時代中演進的關鍵角色、面臨的挑戰與未來策略。</p>
+                <div class="mt-10">
+                    <a href="#toolkit" class="inline-block bg-teal-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-teal-700 transition-colors">開始探索</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Toolkit Section -->
+        <section id="toolkit" class="page-section bg-stone-100 hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-stone-800">AI工具箱：系統性回顧的利器</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">系統性回顧的各個階段都有對應的AI工具可以輔助。點擊下方卡片，了解不同類型的AI工具及其代表性產品。</p>
+                </div>
+                <div id="toolkit-container" class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                    <!-- Cards will be injected by JS -->
+                </div>
+                <div id="toolkit-details" class="mt-8 p-6 bg-white rounded-lg shadow-md hidden fade-in">
+                    <!-- Details will be injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Showdown Section -->
+        <section id="showdown" class="page-section bg-white hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="lg:text-center">
+                    <h2 class="text-3xl font-bold text-stone-800">模型對決：ChatGPT vs. Gemini</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">不同AI模型在各醫學專業領域的表現有所差異。選擇一個領域，查看ChatGPT與Gemini的準確性比較，以及專業AI模型的卓越表現。</p>
+                </div>
+                <div class="mt-10 flex flex-col items-center">
+                    <div class="w-full max-w-xs mb-6">
+                        <label for="specialty-select" class="block text-sm font-medium text-stone-700 mb-2">選擇醫學專業領域：</label>
+                        <select id="specialty-select" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                            <!-- Options will be injected by JS -->
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="showdownChart"></canvas>
+                    </div>
+                    <div id="showdown-summary" class="mt-6 max-w-3xl mx-auto text-center text-stone-600">
+                        <!-- Summary text will be updated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Human-AI Synergy Section -->
+        <section id="synergy" class="page-section bg-stone-100 hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-stone-800">人機協作：1+1>2的綜效</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">AI不僅提升效率，與人類專家協作時更能達到「超人」的表現水平。本區展示AI在速度、準確性上的驚人表現，以及人機協作帶來的加乘效果。</p>
+                </div>
+                <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                    <div class="stat-card">
+                        <p class="text-4xl font-bold text-teal-600">12年 → 2天</p>
+                        <p class="mt-2 text-stone-600">otto-SR系統完成傳統需12個工作年的研究</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="text-4xl font-bold text-teal-600">>50%</p>
+                        <p class="mt-2 text-stone-600">AI工具識別相關文獻的速度平均提升超過50%</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="text-4xl font-bold text-teal-600">93.1%</p>
+                        <p class="mt-2 text-stone-600">AI數據提取準確率 (人類為79.7%)</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="text-4xl font-bold text-teal-600">+22.6%</p>
+                        <p class="mt-2 text-stone-600">人機協作模式下的研究篩選時間節省</p>
+                    </div>
+                </div>
+                 <div class="mt-16">
+                    <h3 class="text-xl font-bold text-center text-stone-800 mb-6">任務性能量化比較</h3>
+                    <div class="chart-container">
+                        <canvas id="synergyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Challenges & Ethics Section -->
+        <section id="challenges" class="page-section bg-white hidden">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-stone-800">挑戰、局限與倫理考量</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">AI的應用並非沒有風險。從「黑箱」現象到演算法偏見，了解在醫學研究中部署AI所面臨的關鍵障礙至關重要。</p>
+                </div>
+                <div id="challenges-accordion" class="mt-12 space-y-4">
+                    <!-- Accordion items will be injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Strategies Section -->
+        <section id="strategies" class="page-section bg-stone-100 hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-stone-800">醫院研究者的行動策略</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">面對AI浪潮，醫院研究者應採取積極策略，轉型為知識守護者、AI工具的使用專家，以及倫理實施的倡導者。</p>
+                </div>
+                <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-teal-500 text-white">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                        </div>
+                        <h3 class="mt-5 text-lg font-medium text-stone-900">培養AI素養與能力</h3>
+                        <p class="mt-2 text-base text-stone-600">提升數據管理、分析與內容策劃能力，並指導使用者批判性地評估AI生成內容，了解其優缺點。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-teal-500 text-white">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <h3 class="mt-5 text-lg font-medium text-stone-900">制定最佳實踐</h3>
+                        <p class="mt-2 text-base text-stone-600">根據項目特點選擇合適的AI工具，實施「人在迴路」工作流程，結合多種工具發揮其專業優勢。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                         <div class="flex items-center justify-center h-12 w-12 rounded-md bg-teal-500 text-white">
+                           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6.364-3.636l-1.414 1.414M21 12h-2M4 12H2m15.364-6.364l-1.414-1.414M6.364 6.364L4.95 4.95M12 3v2m0 12v2m-6.364-3.636l-1.414-1.414M12 21a9 9 0 100-18 9 9 0 000 18z" /></svg>
+                        </div>
+                        <h3 class="mt-5 text-lg font-medium text-stone-900">倡導倫理AI實施</h3>
+                        <p class="mt-2 text-base text-stone-600">作為科學流程的「完整性保護者」，打擊虛假資訊，解決演算法偏見，並倡導可解釋AI與明確的責任框架。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
+            <div class="mt-8 md:mt-0 md:order-1">
+                <p class="text-center text-base text-stone-500">&copy; 2025 AI醫學檢索互動式分析報告。基於AI醫學檢索的深度分析報告創建。</p>
+            </div>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Page navigation logic - Set up first to ensure it works regardless of other code
+    const pageSections = document.querySelectorAll('.page-section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+
+    const showPage = (pageId) => {
+        pageSections.forEach(section => {
+            section.classList.add('hidden');
+        });
+        document.querySelector(pageId).classList.remove('hidden');
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+        const activeLink = document.querySelector(`[href="${pageId}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+
+        // Scroll to top of the new page, accounting for fixed header
+        const headerOffset = document.getElementById('header').offsetHeight;
+        window.scrollTo({
+            top: document.querySelector(pageId).offsetTop - headerOffset,
+            behavior: 'smooth'
+        });
+    };
+
+    // Navigation click handlers
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pageId = link.getAttribute('href');
+            showPage(pageId);
+            if (!mobileMenu.classList.contains('hidden')) { // Close mobile menu if open
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    });
+
+    // 開始探索 button click handler
+    const startExploringButton = document.querySelector('a[href="#toolkit"]:not(.nav-link)');
+    if (startExploringButton) {
+        startExploringButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            showPage('#toolkit');
+        });
+    }
+
+    // Mobile Menu Toggle
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Close mobile menu on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
+    });
+
+    // Initial page load
+    showPage('#home');
+
+    // Data Store
+    const showdownData = {
+        '放射學': {
+            labels: ['ChatGPT (通用)', 'Gemini (通用)'],
+            datasets: [{
+                label: '準確性 (%)',
+                data: [87.43, 71],
+                backgroundColor: ['#2DD4BF', '#A78BFA'],
+            }],
+            summary: '在放射學領域，ChatGPT展現出比Gemini更高的準確性，且回應長度更短。特別是在胸部放射學和超音波方面，ChatGPT的準確性達到100%。'
+        },
+        '近視護理': {
+            labels: ['ChatGPT', 'Gemini'],
+            datasets: [{
+                label: '準確性 (%)',
+                data: [80.6, 54.8],
+                backgroundColor: ['#2DD4BF', '#A78BFA'],
+            }],
+            summary: '在近視護理查詢中，儘管回應長度相似，ChatGPT的準確性（80.6%）明顯高於Gemini（54.8%）。'
+        },
+        '心血管藥理學': {
+            labels: ['ChatGPT-4', 'Copilot', 'Google Gemini'],
+            datasets: [{
+                label: '高級MCQ準確性 (%)',
+                data: [73, 53, 20],
+                backgroundColor: ['#2DD4BF', '#60A5FA', '#A78BFA'],
+            }],
+            summary: '在心血管藥理學的複雜多選題中，ChatGPT-4表現最佳，而Google Gemini顯示出顯著的局限性。'
+        },
+        '緊急情況': {
+            labels: ['ChatGPT', 'Gemini'],
+            datasets: [{
+                label: '準確性 (%)',
+                data: [77, 87],
+                backgroundColor: ['#2DD4BF', '#A78BFA'],
+            }],
+            summary: '在需要詳細資訊的緊急情況下，Gemini的表現優於ChatGPT，這可能與其提供更長、更詳細回應的傾向有關。'
+        },
+        '專業 vs. 通用模型': {
+            labels: ['LEADS (專業)', 'GPT-4o (通用)'],
+             datasets: [{
+                label: '數據提取準確性',
+                data: [0.68, 0.55],
+                backgroundColor: ['#0D9488', '#FBBF24'],
+            }],
+            summary: '專為醫學文獻設計的AI模型（如LEADS）在研究檢索、篩選和數據提取等任務中，始終優於最強大的通用模型（如GPT-4o），突顯了領域特定訓練的重要性。'
+        }
+    };
+
+    const synergyData = {
+        labels: ['準確性 (%)', '敏感度/召回率 (%)', '時間節省 (%)'],
+        datasets: [
+            {
+                label: '人類 (單獨)',
+                data: [79.7, 81.7, 0],
+                backgroundColor: '#FBBF24', // Amber
+            },
+            {
+                label: 'AI (單獨)',
+                data: [93.1, 96.7, 77], // Using 77% from ASReview as a proxy
+                backgroundColor: '#60A5FA', // Blue
+            },
+            {
+                label: '人機協作',
+                data: [85, 81, 26.9], // Using LEADS+Expert data
+                backgroundColor: '#2DD4BF', // Teal
+            }
+        ]
+    };
+    
+    const toolkitData = {
+        "一般研究助理": {
+            icon: `<svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-5.747-8.994l11.494 5.248M5.753 17.747l11.494-5.248" /></svg>`,
+            description: "這些工具利用大型語言模型來理解研究問題、查找相關文獻、總結發現並提取關鍵資訊。",
+            tools: [
+                { name: 'Elicit.org', desc: '利用語義相似性查找文獻，並自動化回顧流程。' },
+                { name: 'Consensus.app', desc: '從海量文獻中查找和綜合發現，並提供「共識計」。' },
+                { name: 'OpenRead', desc: '能生成帶引文的綜合報告，並允許後續提問。' }
+            ]
+        },
+        "篩選與數據提取": {
+            icon: `<svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1v-6a1 1 0 00-1-1h-6z" /></svg>`,
+            description: "專門用於加速系統性回顧中最耗時的環節：篩選文獻和從全文中提取結構化數據。",
+            tools: [
+                { name: 'Rayyan', desc: '免費的協作篩選工具，可節省約40%時間。' },
+                { name: 'DistillerSR', desc: '利用主動機器學習加速識別相關記錄，平均快50%。' },
+                { name: 'RobotReviewer', desc: '自動從RCT文章中確定PICO、研究設計和偏倚風險。' },
+                { name: 'Laser AI', desc: '專為活體系統性回顧設計，簡化篩選和數據提取。' }
+            ]
+        },
+        "引文分析與映射": {
+            icon: `<svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>`,
+            description: "這些工具透過視覺化圖形和智能索引來幫助研究人員理解研究領域的結構、發現關鍵論文和追蹤學術影響力。",
+            tools: [
+                { name: 'Semantic Scholar', desc: '提供語義檢索、研究推薦和「TLDRs」摘要。' },
+                { name: 'Connected Papers', desc: '用視覺圖形顯示相關研究及其引文連接。' },
+                { name: 'Research Rabbit', desc: '基於引文的映射工具，可識別相似、早期和後期的作品。' },
+                { name: 'Scite.ai', desc: '智能引文索引，對引文意圖進行分類（支持、對比、提及）。' }
+            ]
+        },
+        "LLMs輔助": {
+            icon: `<svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>`,
+            description: "通用大型語言模型可作為多功能的助理，但其輸出必須經過嚴格的人工驗證。",
+            tools: [
+                { name: 'ChatGPT/Copilot/Gemini', desc: '可協助制定研究問題、生成檢索詞、創建檢索字串。' },
+                { name: 'Claude', desc: '具有超大上下文窗口，擅長處理大量文獻進行分析總結。' }
+            ]
+        }
+    };
+    
+    const challengesData = {
+        "倫理障礙": {
+            icon: '🛡️',
+            points: ["<b>隱私：</b>大量病人數據的使用引發隱私和機密性擔憂。", "<b>信任：</b>醫療專業人員缺乏評估AI的培訓，回顧性證據過多。", "<b>透明度（黑箱現象）：</b>無法解釋決策基礎，導致驗證和監督困難。", "<b>利益衝突：</b>商業開發可能導致審查不足的AI進入市場。", "<b>演算法公平性：</b>存在潛在偏見風險，需持續努力確保公平。"]
+        },
+        "技術障礙": {
+            icon: '⚙️',
+            points: ["<b>數據品質：</b>AI性能受訓練數據的品質、完整性和大小限制。", "<b>互操作性：</b>數據標準化和互操作性的缺乏阻礙了AI的整合。", "<b>基礎設施：</b>實施AI需要昂貴的IT系統和數據共享基礎設施。"]
+        },
+        "責任與監管": {
+            icon: '⚖️',
+            points: ["<b>責任歸屬：</b>AI驅動決策的責任歸屬問題（醫生、開發者、機構）尚未解決。", "<b>監管框架：</b>缺乏明確的AI批准系統和統一的評估框架。"]
+        },
+        "勞動力障礙": {
+            icon: '👥',
+            points: ["<b>教育與培訓：</b>醫療專業人員和醫學課程中普遍缺乏AI知識與培訓。", "<b>意願與參與：</b>醫生的懷疑態度、對失業的擔憂等阻礙採用。", "<b>財政與時間：</b>專家數據標註和系統維護成本高昂。"]
+        },
+        "病人安全": {
+            icon: '❤️',
+            points: ["<b>分佈轉移：</b>AI在真實世界數據中的表現可能不如受控數據集。", "<b>自動化偏見：</b>臨床醫生可能因過度依賴AI而變得自滿。", "<b>可解釋AI需求：</b>需要透明的「可解釋AI」而非「黑箱」，以允許人類審查。"]
+        },
+         "社會障礙": {
+            icon: '🌍',
+            points: ["<b>健康不平等：</b>不具代表性的訓練數據可能加劇現有健康不平等。", "<b>數位鴻溝：</b>AI基礎設施的訪問不均可能導致兩級醫療系統。", "<b>社會接受度：</b>對「黑箱」和失去人際互動的擔憂阻礙公眾和病人對AI的接受。"]
+        }
+    };
+
+    // Chart.js Configuration
+    Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
+    Chart.defaults.color = '#57534E'; // stone-600
+
+    const createChart = (ctx, type, data, options = {}) => {
+        return new Chart(ctx, {
+            type: type,
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#E7E5E4' },
+                        ticks: { color: '#57534E' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#57534E' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#57534E'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#44403C',
+                        titleColor: '#F5F5F4',
+                        bodyColor: '#F5F5F4',
+                        boxPadding: 4,
+                        callbacks: {
+                           label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    if(context.dataset.label.includes('%')) {
+                                      label += context.parsed.y + '%';
+                                    } else {
+                                      label += context.parsed.y;
+                                    }
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                ...options
+            }
+        });
+    };
+    
+    // Init Showdown Chart
+    let showdownChart; // Declare outside for scope
+    let showdownCtx, specialtySelect, showdownSummaryEl;
+    
+    try {
+        showdownCtx = document.getElementById('showdownChart').getContext('2d');
+        specialtySelect = document.getElementById('specialty-select');
+        showdownSummaryEl = document.getElementById('showdown-summary');
+
+        Object.keys(showdownData).forEach(specialty => {
+            const option = document.createElement('option');
+            option.value = specialty;
+            option.textContent = specialty;
+            specialtySelect.appendChild(option);
+        });
+    } catch (e) {
+        console.warn('Showdown chart initialization failed:', e);
+    }
+
+    // Init Synergy Chart
+    let synergyChart; // Declare outside for scope
+    let synergyCtx;
+    
+    try {
+        synergyCtx = document.getElementById('synergyChart').getContext('2d');
+    } catch (e) {
+        console.warn('Synergy chart initialization failed:', e);
+    }
+
+    // Chart handling - add chart creation logic to showPage function
+    const originalShowPage = showPage;
+    window.showPage = (pageId) => {
+        originalShowPage(pageId);
+        
+        // Special handling for charts to ensure they render correctly when their div becomes visible
+        if (pageId === '#showdown' && !showdownChart && showdownCtx) {
+            try {
+                showdownChart = createChart(showdownCtx, 'bar', showdownData[specialtySelect.value]);
+                if (showdownSummaryEl) {
+                    showdownSummaryEl.textContent = showdownData[specialtySelect.value].summary;
+                }
+            } catch (e) {
+                console.warn('Failed to create showdown chart:', e);
+            }
+        } else if (pageId === '#showdown' && showdownChart) {
+            showdownChart.update(); // Update to ensure responsiveness is triggered
+        }
+
+        if (pageId === '#synergy' && !synergyChart && synergyCtx) {
+            try {
+                synergyChart = createChart(synergyCtx, 'bar', synergyData, {
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(1) + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                         y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.warn('Failed to create synergy chart:', e);
+            }
+        } else if (pageId === '#synergy' && synergyChart) {
+            synergyChart.update(); // Update to ensure responsiveness is triggered
+        }
+    };
+
+    if (specialtySelect) {
+        specialtySelect.addEventListener('change', (e) => {
+            const selectedSpecialty = e.target.value;
+            if (showdownChart) {
+                showdownChart.data = showdownData[selectedSpecialty];
+                showdownChart.update();
+                if (showdownSummaryEl) {
+                    showdownSummaryEl.textContent = showdownData[selectedSpecialty].summary;
+                }
+            }
+        });
+    }
+
+    // Init Toolkit Section
+    const toolkitContainer = document.getElementById('toolkit-container');
+    const toolkitDetails = document.getElementById('toolkit-details');
+    let lastActiveButton = null;
+    let lastActiveMobileButton = null;
+
+    // Helper function to detect mobile
+    const isMobile = () => window.innerWidth <= 768;
+
+    // Helper function to create enhanced tool display
+    const createEnhancedToolDisplay = (tools, isMobileView = false) => {
+        if (isMobileView) {
+            return tools.map(tool => `
+                <div class="tool-item">
+                    <div class="tool-icon">
+                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div class="tool-content">
+                        <h4>${tool.name}</h4>
+                        <p>${tool.desc}</p>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            return `<ul class="mt-4 space-y-3">
+                ${tools.map(tool => `
+                    <li class="flex items-start p-3 bg-stone-50 rounded-lg border border-stone-200">
+                        <div class="flex-shrink-0 w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center mr-3">
+                            <svg class="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <strong class="text-stone-800">${tool.name}:</strong>
+                            <span class="text-stone-600"> ${tool.desc}</span>
+                        </div>
+                    </li>
+                `).join('')}
+            </ul>`;
+        }
+    };
+
+    Object.entries(toolkitData).forEach(([category, data]) => {
+        // Create card container div
+        const cardContainer = document.createElement('div');
+        cardContainer.className = 'toolkit-card-mobile';
+        
+        // Create the button
+        const button = document.createElement('button');
+        button.className = 'p-6 bg-white rounded-lg shadow-md flex flex-col items-center text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-full';
+        button.innerHTML = `
+            <div class="flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-teal-600">
+                ${data.icon}
+            </div>
+            <h3 class="mt-4 text-lg font-medium text-stone-800">${category}</h3>
+        `;
+
+        // Create mobile details section
+        const mobileDetails = document.createElement('div');
+        mobileDetails.className = 'toolkit-details-mobile hidden';
+        mobileDetails.innerHTML = `
+            <h4 class="text-lg font-bold text-teal-700 mb-3">${category}</h4>
+            <p class="text-stone-600 mb-4">${data.description}</p>
+            ${createEnhancedToolDisplay(data.tools, true)}
+        `;
+
+        // Add click handler
+        button.addEventListener('click', () => {
+            if (isMobile()) {
+                // Mobile behavior: toggle details below this card
+                if (lastActiveMobileButton === button) {
+                    mobileDetails.classList.add('hidden');
+                    button.classList.remove('ring-2', 'ring-teal-500');
+                    lastActiveMobileButton = null;
+                    return;
+                }
+
+                // Hide other mobile details
+                if (lastActiveMobileButton) {
+                    const prevMobileDetails = lastActiveMobileButton.parentNode.querySelector('.toolkit-details-mobile');
+                    if (prevMobileDetails) {
+                        prevMobileDetails.classList.add('hidden');
+                    }
+                    lastActiveMobileButton.classList.remove('ring-2', 'ring-teal-500');
+                }
+
+                // Show current details
+                mobileDetails.classList.remove('hidden');
+                button.classList.add('ring-2', 'ring-teal-500');
+                lastActiveMobileButton = button;
+                
+                // Smooth scroll to show the details
+                setTimeout(() => {
+                    mobileDetails.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            } else {
+                // Desktop behavior: show in shared details area
+                if (lastActiveButton === button) {
+                    toolkitDetails.classList.add('hidden');
+                    lastActiveButton.classList.remove('ring-2', 'ring-teal-500');
+                    lastActiveButton = null;
+                    return;
+                }
+
+                if (lastActiveButton) {
+                    lastActiveButton.classList.remove('ring-2', 'ring-teal-500');
+                }
+
+                toolkitDetails.innerHTML = `
+                    <h4 class="text-xl font-bold text-teal-700">${category}</h4>
+                    <p class="mt-2 text-stone-600 mb-4">${data.description}</p>
+                    ${createEnhancedToolDisplay(data.tools, false)}
+                `;
+                toolkitDetails.classList.remove('hidden');
+                button.classList.add('ring-2', 'ring-teal-500');
+                lastActiveButton = button;
+            }
+        });
+
+        // Assemble the card
+        cardContainer.appendChild(button);
+        cardContainer.appendChild(mobileDetails);
+        toolkitContainer.appendChild(cardContainer);
+    });
+
+    // Handle window resize to switch between mobile/desktop behavior
+    window.addEventListener('resize', () => {
+        // Reset states when switching between mobile/desktop
+        if (lastActiveButton) {
+            lastActiveButton.classList.remove('ring-2', 'ring-teal-500');
+            lastActiveButton = null;
+        }
+        if (lastActiveMobileButton) {
+            lastActiveMobileButton.classList.remove('ring-2', 'ring-teal-500');
+            lastActiveMobileButton = null;
+        }
+        toolkitDetails.classList.add('hidden');
+        document.querySelectorAll('.toolkit-details-mobile').forEach(detail => {
+            detail.classList.add('hidden');
+        });
+    });
+    
+    // Init Challenges Accordion
+    const accordionContainer = document.getElementById('challenges-accordion');
+    Object.entries(challengesData).forEach(([title, data], index) => {
+        const itemDiv = document.createElement('div');
+        const button = document.createElement('button');
+        button.className = 'accordion-button';
+        button.innerHTML = `
+            <span>${data.icon} ${title}</span>
+            <svg class="w-5 h-5 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        `;
+        
+        const content = document.createElement('div');
+        content.className = 'accordion-content hidden';
+        content.innerHTML = `<ul class="space-y-2">${data.points.map(p => `<li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">▪</span><span>${p}</span></li>`).join('')}</ul>`;
+        
+        button.addEventListener('click', () => {
+            const isHidden = content.classList.contains('hidden');
+            // Close all others
+            accordionContainer.querySelectorAll('.accordion-content').forEach(el => el.classList.add('hidden'));
+            accordionContainer.querySelectorAll('.accordion-button svg').forEach(svg => svg.classList.remove('rotate-180'));
+
+            if (isHidden) {
+                content.classList.remove('hidden');
+                button.querySelector('svg').classList.add('rotate-180');
+            }
+        });
+
+        itemDiv.appendChild(button);
+        itemDiv.appendChild(content);
+        accordionContainer.appendChild(itemDiv);
+    });
+
+});
+</script>
+</body>
+</html>
