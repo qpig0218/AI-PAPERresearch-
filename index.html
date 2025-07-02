@@ -29,6 +29,15 @@
             .chart-container {
                 height: 350px;
                 max-height: 60vh;
+                min-height: 300px; /* Ensure minimum height on mobile */
+                padding: 0 10px; /* Add padding to prevent edge cutoff */
+            }
+        }
+        /* Ensure canvas elements are properly sized on mobile */
+        @media (max-width: 768px) {
+            .chart-container canvas {
+                max-width: 100% !important;
+                height: auto !important;
             }
         }
         .nav-link {
@@ -295,38 +304,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Page navigation logic
-    const pageSections = document.querySelectorAll('.page-section');
-    const navLinks = document.querySelectorAll('.nav-link');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
+
 
     const showPage = (pageId) => {
         pageSections.forEach(section => {
             section.classList.add('hidden');
         });
-        const targetSection = document.querySelector(pageId);
-        if (targetSection) {
-            targetSection.classList.remove('hidden');
-        }
 
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-        });
-        const activeLink = document.querySelector(`[href="${pageId}"]`);
-        if (activeLink) {
-            activeLink.classList.add('active');
-        }
-    };
-
-    // Navigation click handlers
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const pageId = link.getAttribute('href');
-            showPage(pageId);
-            if (!mobileMenu.classList.contains('hidden')) {
-                mobileMenu.classList.add('hidden');
             }
         });
     });
@@ -346,6 +330,32 @@ document.addEventListener('DOMContentLoaded', () => {
             mobileMenu.classList.toggle('hidden');
         });
     }
+
+    // Add resize handler for mobile viewport changes and orientation changes
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (showdownChart) {
+                showdownChart.resize();
+            }
+            if (synergyChart) {
+                synergyChart.resize();
+            }
+        }, 250);
+    });
+
+    // Add orientation change handler for mobile devices
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            if (showdownChart) {
+                showdownChart.resize();
+            }
+            if (synergyChart) {
+                synergyChart.resize();
+            }
+        }, 500); // Longer delay for orientation change
+    });
 
     // Init Toolkit Section
     const toolkitContainer = document.getElementById('toolkit-container');
