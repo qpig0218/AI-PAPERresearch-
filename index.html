@@ -546,9 +546,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Chart.js Configuration
-    Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
-    Chart.defaults.color = '#57534E'; // stone-600
+    // Chart.js Configuration (wait for Chart to load first)
+    const initializeCharts = () => {
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js not loaded yet, retrying...');
+            setTimeout(initializeCharts, 100);
+            return;
+        }
+
+        Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
+        Chart.defaults.color = '#57534E'; // stone-600
 
     const createChart = (ctx, type, data, options = {}) => {
         return new Chart(ctx, {
@@ -618,6 +625,11 @@ document.addEventListener('DOMContentLoaded', () => {
             option.textContent = specialty;
             specialtySelect.appendChild(option);
         });
+
+        // Set default selection to first specialty
+        if (specialtySelect.options.length > 0) {
+            specialtySelect.selectedIndex = 0;
+        }
     } catch (e) {
         console.warn('Showdown chart initialization failed:', e);
     }
@@ -870,6 +882,11 @@ document.addEventListener('DOMContentLoaded', () => {
         itemDiv.appendChild(content);
         accordionContainer.appendChild(itemDiv);
     });
+
+    }; // End of initializeCharts function
+
+    // Start chart initialization
+    initializeCharts();
 
 });
 </script>
