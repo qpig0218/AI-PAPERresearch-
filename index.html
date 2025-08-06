@@ -304,13 +304,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-
+    // Page navigation logic - Set up first to ensure it works regardless of other code
+    const pageSections = document.querySelectorAll('.page-section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
 
     const showPage = (pageId) => {
         pageSections.forEach(section => {
             section.classList.add('hidden');
         });
+        document.querySelector(pageId).classList.remove('hidden');
 
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+        const activeLink = document.querySelector(`[href="${pageId}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+
+        // Scroll to top of the new page, accounting for fixed header
+        const headerOffset = document.getElementById('header').offsetHeight;
+        window.scrollTo({
+            top: document.querySelector(pageId).offsetTop - headerOffset,
+            behavior: 'smooth'
+        });
+    };
+
+    // Navigation click handlers
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pageId = link.getAttribute('href');
+            showPage(pageId);
+            if (!mobileMenu.classList.contains('hidden')) { // Close mobile menu if open
+                mobileMenu.classList.add('hidden');
             }
         });
     });
@@ -330,6 +359,16 @@ document.addEventListener('DOMContentLoaded', () => {
             mobileMenu.classList.toggle('hidden');
         });
     }
+
+    // Close mobile menu on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
+    });
+
+    // Initial page load
+    showPage('#home');
 
     // Add resize handler for mobile viewport changes and orientation changes
     let resizeTimeout;
