@@ -218,39 +218,106 @@
             </div>
         </section>
 
-        <!-- Placeholder sections for other parts -->
+        <!-- AI Showdown Section -->
         <section id="showdown" class="page-section bg-white hidden">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-                <div class="text-center">
-                    <h2 class="text-3xl font-bold text-stone-800">模型對決</h2>
-                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">不同AI模型性能比較</p>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="lg:text-center">
+                    <h2 class="text-3xl font-bold text-stone-800">模型對決：ChatGPT vs. Gemini</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">不同AI模型在各醫學專業領域的表現有所差異。選擇一個領域，查看ChatGPT與Gemini的準確性比較，以及專業AI模型的卓越表現。</p>
+                </div>
+                <div class="mt-10 flex flex-col items-center">
+                    <div class="w-full max-w-xs mb-6">
+                        <label for="specialty-select" class="block text-sm font-medium text-stone-700 mb-2">選擇醫學專業領域：</label>
+                        <select id="specialty-select" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                            <!-- Options will be injected by JS -->
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="showdownChart"></canvas>
+                    </div>
+                    <div id="showdown-summary" class="mt-6 max-w-3xl mx-auto text-center text-stone-600">
+                        <!-- Summary text will be updated by JS -->
+                    </div>
                 </div>
             </div>
         </section>
 
+        <!-- Human-AI Synergy Section -->
         <section id="synergy" class="page-section bg-stone-100 hidden">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold text-stone-800">人機協作</h2>
-                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">AI與人類專家的協作效果</p>
+                    <h2 class="text-3xl font-bold text-stone-800">人機協作：1+1>2的綜效</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">AI不僅提升效率，與人類專家協作時更能達到「超人」的表現水平。本區展示AI在速度、準確性上的驚人表現，以及人機協作帶來的加乘效果。</p>
+                </div>
+                <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                    <div class="stat-card">
+                        <p class="text-4xl font-bold text-teal-600">12年 → 2天</p>
+                        <p class="mt-2 text-stone-600">otto-SR系統完成傳統需12個工作年的研究</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="text-4xl font-bold text-teal-600">>50%</p>
+                        <p class="mt-2 text-stone-600">AI工具識別相關文獻的速度平均提升超過50%</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="text-4xl font-bold text-teal-600">93.1%</p>
+                        <p class="mt-2 text-stone-600">AI數據提取準確率 (人類為79.7%)</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="text-4xl font-bold text-teal-600">+22.6%</p>
+                        <p class="mt-2 text-stone-600">人機協作模式下的研究篩選時間節省</p>
+                    </div>
+                </div>
+                 <div class="mt-16">
+                    <h3 class="text-xl font-bold text-center text-stone-800 mb-6">任務性能量化比較</h3>
+                    <div class="chart-container">
+                        <canvas id="synergyChart"></canvas>
+                    </div>
                 </div>
             </div>
         </section>
 
+        <!-- Challenges & Ethics Section -->
         <section id="challenges" class="page-section bg-white hidden">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold text-stone-800">挑戰與倫理</h2>
-                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">AI應用面臨的挑戰和倫理考量</p>
+                    <h2 class="text-3xl font-bold text-stone-800">挑戰、局限與倫理考量</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">AI的應用並非沒有風險。從「黑箱」現象到演算法偏見，了解在醫學研究中部署AI所面臨的關鍵障礙至關重要。</p>
+                </div>
+                <div id="challenges-accordion" class="mt-12 space-y-4">
+                    <!-- Accordion items will be injected by JS -->
                 </div>
             </div>
         </section>
 
+        <!-- Strategies Section -->
         <section id="strategies" class="page-section bg-stone-100 hidden">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold text-stone-800">行動策略</h2>
-                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">實施AI的策略和建議</p>
+                    <h2 class="text-3xl font-bold text-stone-800">醫院研究者的行動策略</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">面對AI浪潮，醫院研究者應採取積極策略，轉型為知識守護者、AI工具的使用專家，以及倫理實施的倡導者。</p>
+                </div>
+                <div class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-teal-500 text-white">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                        </div>
+                        <h3 class="mt-5 text-lg font-medium text-stone-900">培養AI素養與能力</h3>
+                        <p class="mt-2 text-base text-stone-600">提升數據管理、分析與內容策劃能力，並指導使用者批判性地評估AI生成內容，了解其優缺點。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-teal-500 text-white">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <h3 class="mt-5 text-lg font-medium text-stone-900">制定最佳實踐</h3>
+                        <p class="mt-2 text-base text-stone-600">根據項目特點選擇合適的AI工具，實施「人在迴路」工作流程，結合多種工具發揮其專業優勢。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                         <div class="flex items-center justify-center h-12 w-12 rounded-md bg-teal-500 text-white">
+                           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6.364-3.636l-1.414 1.414M21 12h-2M4 12H2m15.364-6.364l-1.414-1.414M6.364 6.364L4.95 4.95M12 3v2m0 12v2m-6.364-3.636l-1.414-1.414M12 21a9 9 0 100-18 9 9 0 000 18z" /></svg>
+                        </div>
+                        <h3 class="mt-5 text-lg font-medium text-stone-900">倡導倫理AI實施</h3>
+                        <p class="mt-2 text-base text-stone-600">作為科學流程的「完整性保護者」，打擊虛假資訊，解決演算法偏見，並倡導可解釋AI與明確的責任框架。</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -301,6 +368,105 @@ document.addEventListener('DOMContentLoaded', () => {
                 { name: 'ChatGPT/Copilot/Gemini', desc: '可協助制定研究問題、生成檢索詞、創建檢索字串。' },
                 { name: 'Claude', desc: '具有超大上下文窗口，擅長處理大量文獻進行分析總結。' }
             ]
+        }
+    };
+
+    // Showdown data for AI model comparison
+    const showdownData = {
+        '放射學': {
+            labels: ['ChatGPT (通用)', 'Gemini (通用)'],
+            datasets: [{
+                label: '準確性 (%)',
+                data: [87.43, 71],
+                backgroundColor: ['#2DD4BF', '#A78BFA'],
+            }],
+            summary: '在放射學領域，ChatGPT展現出比Gemini更高的準確性，且回應長度更短。特別是在胸部放射學和超音波方面，ChatGPT的準確性達到100%。'
+        },
+        '近視護理': {
+            labels: ['ChatGPT', 'Gemini'],
+            datasets: [{
+                label: '準確性 (%)',
+                data: [80.6, 54.8],
+                backgroundColor: ['#2DD4BF', '#A78BFA'],
+            }],
+            summary: '在近視護理查詢中，儘管回應長度相似，ChatGPT的準確性（80.6%）明顯高於Gemini（54.8%）。'
+        },
+        '心血管藥理學': {
+            labels: ['ChatGPT-4', 'Copilot', 'Google Gemini'],
+            datasets: [{
+                label: '高級MCQ準確性 (%)',
+                data: [73, 53, 20],
+                backgroundColor: ['#2DD4BF', '#60A5FA', '#A78BFA'],
+            }],
+            summary: '在心血管藥理學的複雜多選題中，ChatGPT-4表現最佳，而Google Gemini顯示出顯著的局限性。'
+        },
+        '緊急情況': {
+            labels: ['ChatGPT', 'Gemini'],
+            datasets: [{
+                label: '準確性 (%)',
+                data: [77, 87],
+                backgroundColor: ['#2DD4BF', '#A78BFA'],
+            }],
+            summary: '在需要詳細資訊的緊急情況下，Gemini的表現優於ChatGPT，這可能與其提供更長、更詳細回應的傾向有關。'
+        },
+        '專業 vs. 通用模型': {
+            labels: ['LEADS (專業)', 'GPT-4o (通用)'],
+             datasets: [{
+                label: '數據提取準確性',
+                data: [0.68, 0.55],
+                backgroundColor: ['#0D9488', '#FBBF24'],
+            }],
+            summary: '專為醫學文獻設計的AI模型（如LEADS）在研究檢索、篩選和數據提取等任務中，始終優於最強大的通用模型（如GPT-4o），突顯了領域特定訓練的重要性。'
+        }
+    };
+
+    // Synergy data for human-AI collaboration comparison
+    const synergyData = {
+        labels: ['準確性 (%)', '敏感度/召回率 (%)', '時間節省 (%)'],
+        datasets: [
+            {
+                label: '人類 (單獨)',
+                data: [79.7, 81.7, 0],
+                backgroundColor: '#FBBF24', // Amber
+            },
+            {
+                label: 'AI (單獨)',
+                data: [93.1, 96.7, 77], // Using 77% from ASReview as a proxy
+                backgroundColor: '#60A5FA', // Blue
+            },
+            {
+                label: '人機協作',
+                data: [85, 81, 26.9], // Using LEADS+Expert data
+                backgroundColor: '#2DD4BF', // Teal
+            }
+        ]
+    };
+    
+    // Challenges data for accordion
+    const challengesData = {
+        "倫理障礙": {
+            icon: '🛡️',
+            points: ["<b>隱私：</b>大量病人數據的使用引發隱私和機密性擔憂。", "<b>信任：</b>醫療專業人員缺乏評估AI的培訓，回顧性證據過多。", "<b>透明度（黑箱現象）：</b>無法解釋決策基礎，導致驗證和監督困難。", "<b>利益衝突：</b>商業開發可能導致審查不足的AI進入市場。", "<b>演算法公平性：</b>存在潛在偏見風險，需持續努力確保公平。"]
+        },
+        "技術障礙": {
+            icon: '⚙️',
+            points: ["<b>數據品質：</b>AI性能受訓練數據的品質、完整性和大小限制。", "<b>互操作性：</b>數據標準化和互操作性的缺乏阻礙了AI的整合。", "<b>基礎設施：</b>實施AI需要昂貴的IT系統和數據共享基礎設施。"]
+        },
+        "責任與監管": {
+            icon: '⚖️',
+            points: ["<b>責任歸屬：</b>AI驅動決策的責任歸屬問題（醫生、開發者、機構）尚未解決。", "<b>監管框架：</b>缺乏明確的AI批准系統和統一的評估框架。"]
+        },
+        "勞動力障礙": {
+            icon: '👥',
+            points: ["<b>教育與培訓：</b>醫療專業人員和醫學課程中普遍缺乏AI知識與培訓。", "<b>意願與參與：</b>醫生的懷疑態度、對失業的擔憂等阻礙採用。", "<b>財政與時間：</b>專家數據標註和系統維護成本高昂。"]
+        },
+        "病人安全": {
+            icon: '❤️',
+            points: ["<b>分佈轉移：</b>AI在真實世界數據中的表現可能不如受控數據集。", "<b>自動化偏見：</b>臨床醫生可能因過度依賴AI而變得自滿。", "<b>可解釋AI需求：</b>需要透明的「可解釋AI」而非「黑箱」，以允許人類審查。"]
+        },
+         "社會障礙": {
+            icon: '🌍',
+            points: ["<b>健康不平等：</b>不具代表性的訓練數據可能加劇現有健康不平等。", "<b>數位鴻溝：</b>AI基礎設施的訪問不均可能導致兩級醫療系統。", "<b>社會接受度：</b>對「黑箱」和失去人際互動的擔憂阻礙公眾和病人對AI的接受。"]
         }
     };
 
@@ -395,6 +561,159 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 500); // Longer delay for orientation change
     });
+
+    // Chart.js Configuration
+    Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
+    Chart.defaults.color = '#57534E'; // stone-600
+
+    const createChart = (ctx, type, data, options = {}) => {
+        return new Chart(ctx, {
+            type: type,
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#E7E5E4' },
+                        ticks: { color: '#57534E' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#57534E' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#57534E'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#44403C',
+                        titleColor: '#F5F5F4',
+                        bodyColor: '#F5F5F4',
+                        boxPadding: 4,
+                        callbacks: {
+                           label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    if(context.dataset.label.includes('%')) {
+                                      label += context.parsed.y + '%';
+                                    } else {
+                                      label += context.parsed.y;
+                                    }
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                ...options
+            }
+        });
+    };
+    
+    // Init Showdown Chart
+    let showdownChart; // Declare outside for scope
+    let showdownCtx, specialtySelect, showdownSummaryEl;
+    
+    try {
+        showdownCtx = document.getElementById('showdownChart').getContext('2d');
+        specialtySelect = document.getElementById('specialty-select');
+        showdownSummaryEl = document.getElementById('showdown-summary');
+
+        Object.keys(showdownData).forEach(specialty => {
+            const option = document.createElement('option');
+            option.value = specialty;
+            option.textContent = specialty;
+            specialtySelect.appendChild(option);
+        });
+    } catch (e) {
+        console.warn('Showdown chart initialization failed:', e);
+    }
+
+    // Init Synergy Chart
+    let synergyChart; // Declare outside for scope
+    let synergyCtx;
+    
+    try {
+        synergyCtx = document.getElementById('synergyChart').getContext('2d');
+    } catch (e) {
+        console.warn('Synergy chart initialization failed:', e);
+    }
+
+    // Chart handling - add chart creation logic to showPage function
+    const originalShowPage = showPage;
+    window.showPage = (pageId) => {
+        originalShowPage(pageId);
+        
+        // Special handling for charts to ensure they render correctly when their div becomes visible
+        if (pageId === '#showdown' && !showdownChart && showdownCtx) {
+            try {
+                showdownChart = createChart(showdownCtx, 'bar', showdownData[specialtySelect.value]);
+                if (showdownSummaryEl) {
+                    showdownSummaryEl.textContent = showdownData[specialtySelect.value].summary;
+                }
+            } catch (e) {
+                console.warn('Failed to create showdown chart:', e);
+            }
+        } else if (pageId === '#showdown' && showdownChart) {
+            showdownChart.update(); // Update to ensure responsiveness is triggered
+        }
+
+        if (pageId === '#synergy' && !synergyChart && synergyCtx) {
+            try {
+                synergyChart = createChart(synergyCtx, 'bar', synergyData, {
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(1) + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                         y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.warn('Failed to create synergy chart:', e);
+            }
+        } else if (pageId === '#synergy' && synergyChart) {
+            synergyChart.update(); // Update to ensure responsiveness is triggered
+        }
+    };
+
+    if (specialtySelect) {
+        specialtySelect.addEventListener('change', (e) => {
+            const selectedSpecialty = e.target.value;
+            if (showdownChart) {
+                showdownChart.data = showdownData[selectedSpecialty];
+                showdownChart.update();
+                if (showdownSummaryEl) {
+                    showdownSummaryEl.textContent = showdownData[selectedSpecialty].summary;
+                }
+            }
+        });
+    }
 
     // Init Toolkit Section
     const toolkitContainer = document.getElementById('toolkit-container');
@@ -538,6 +857,38 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.toolkit-details-mobile').forEach(detail => {
             detail.classList.add('hidden');
         });
+    });
+    
+    // Init Challenges Accordion
+    const accordionContainer = document.getElementById('challenges-accordion');
+    Object.entries(challengesData).forEach(([title, data], index) => {
+        const itemDiv = document.createElement('div');
+        const button = document.createElement('button');
+        button.className = 'accordion-button';
+        button.innerHTML = `
+            <span>${data.icon} ${title}</span>
+            <svg class="w-5 h-5 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+        `;
+        
+        const content = document.createElement('div');
+        content.className = 'accordion-content hidden';
+        content.innerHTML = `<ul class="space-y-2">${data.points.map(p => `<li class="flex items-start"><span class="text-teal-500 mr-2 mt-1">▪</span><span>${p}</span></li>`).join('')}</ul>`;
+        
+        button.addEventListener('click', () => {
+            const isHidden = content.classList.contains('hidden');
+            // Close all others
+            accordionContainer.querySelectorAll('.accordion-content').forEach(el => el.classList.add('hidden'));
+            accordionContainer.querySelectorAll('.accordion-button svg').forEach(svg => svg.classList.remove('rotate-180'));
+
+            if (isHidden) {
+                content.classList.remove('hidden');
+                button.querySelector('svg').classList.add('rotate-180');
+            }
+        });
+
+        itemDiv.appendChild(button);
+        itemDiv.appendChild(content);
+        accordionContainer.appendChild(itemDiv);
     });
 });
 </script>
